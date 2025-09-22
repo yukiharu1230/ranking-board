@@ -78,13 +78,41 @@ async function fetchData() {
 }
 
 // 詳細表示
+// 詳細表示
 function showDetail(d) {
   document.getElementById("listView").style.display="none";
   document.getElementById("detailView").style.display="block";
   document.getElementById("detailTitle").innerText = "詳細情報";
   document.getElementById("detailUser").innerText = d.user;
-  document.getElementById("detailVoice").innerText = d.voice;
-  document.getElementById("detailTime").innerText = d.timeStr;
+
+  // この担当者のデータだけ抽出
+  const filtered = rowData.filter(r => r.user === d.user);
+
+  // ボイスセット別に集計
+  let voiceTotals = {};
+  filtered.forEach(r => {
+    if (!voiceTotals[r.voice]) voiceTotals[r.voice] = 0;
+    voiceTotals[r.voice] += r.minutes;
+  });
+
+  // HTML生成（表形式）
+  let detailHtml = "<table border='1' style='margin-top:10px;'><tr><th>ボイスセット</th><th>作業時間</th></tr>";
+  Object.keys(voiceTotals).forEach(voice => {
+    let min = voiceTotals[voice];
+    let h = Math.floor(min/60);
+    let m = min % 60;
+    let t = h > 0 ? `${h}時間${m}分` : `${m}分`;
+    detailHtml += `<tr><td>${voice}</td><td>${t}</td></tr>`;
+  });
+  detailHtml += "</table>";
+
+  document.getElementById("detailVoice").innerHTML = detailHtml;
+
+  // 担当全体の合計も出しておく
+  let totalMin = d.totalMin;
+  let h = Math.floor(totalMin/60);
+  let m = totalMin % 60;
+  document.getElementById("detailTime").innerText = h>0 ? `${h}時間${m}分` : `${m}分`;
 }
 
 // 戻る
