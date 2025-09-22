@@ -11,42 +11,55 @@
 </style>
 </head>
 <body>
-<h1 style="text-align:center;">ポキモ ランキング</h1>
+<h1 style="text-align:center;">ポキモ 作業時間集計</h1>
 <table id="rankingTable">
-  <tr><th>順位</th><th>ユーザー</th><th>ポイント</th><th>日付</th></tr>
+  <tr><th>担当</th><th>総ポキモ時間</th></tr>
 </table>
 
 <script>
 async function fetchData() {
-  // 公開されたシートのCSVまたはJSON URL
   const url = "https://docs.google.com/spreadsheets/d/1SJ7cK5g8Qv3ytS4L0dQkRGKktAu-twa8XOFiB0abrpo/gviz/tq?tqx=out:json&sheet=シート1";
-
   const res = await fetch(url);
   const text = await res.text();
 
-  // Google Sheets API は JSONP 形式なのでパースが必要
   const json = JSON.parse(text.substr(47).slice(0, -2));
   const rows = json.table.rows;
 
-  let data = rows.map(r => ({
-    user: r.c[0]?.v || "",
-    points: parseInt(r.c[1]?.v || 0),
-    date: r.c[2]?.v || ""
-  }));
+  // 担当ごとに集計（分）
+  let totals = {};
+  rows.forEach(r => {
+    let user = r.c[0]?.v || "";
+    let minutes = parseInt(r.c[1]?.v || 0); // 作業時間(分)
+    if (!totals[user]) totals[user] = 0;
+    totals[user] += minutes;
+  });
 
-  // ポイント順にソート
-  data.sort((a,b)=> b.points - a.points);
+  // 配列化 & 時間換算
+  let data = Object.keys(totals).map(user => {
+    let totalMin = totals[user];
+    let hours = Math.floor(totalMin / 60);
+    let mins = totalMin % 60;
+    return {
+      user,
+      timeStr: `${hours}時間${mins}分`,
+      totalMin
+    };
+  });
 
-  // テーブルに反映
+  // 総時間が多い順にソート
+  data.sort((a,b)=> b.totalMin - a.totalMin);
+
+  // テーブル反映
   const table = document.getElementById("rankingTable");
-  data.forEach((d,i)=>{
+  data.forEach(d=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${d.user}</td><td>${d.points}</td><td>${d.date}</td>`;
+    tr.innerHTML = `<td>${d.user}</td><td>${d.timeStr}</td>`;
     table.appendChild(tr);
   });
 }
 
 fetchData();
 </script>
+
 </body>
 </html>
