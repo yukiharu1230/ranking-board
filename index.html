@@ -27,12 +27,12 @@ async function fetchData() {
 
   // 担当ごとに集計（分）
   let totals = {};
-  rows.forEach(r => {
-    let user = r.c[0]?.v || "";
-    let minutes = Number(r.c[1]?.v) || 0; // 安全に数値化
-    if (!totals[user]) totals[user] = 0;
-    totals[user] += minutes;
-  });
+rows.forEach(r => {
+  let user = r.c[0]?.v || "";          // A列: 担当者
+  let minutes = Number(r.c[5]?.v) || 0; // F列: 作業時間(分)
+  if (!totals[user]) totals[user] = 0;
+  totals[user] += minutes;
+});
 
   // 配列化 & 時間換算
   let data = Object.keys(totals).map(user => {
