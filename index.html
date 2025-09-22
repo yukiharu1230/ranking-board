@@ -8,54 +8,90 @@
   table { border-collapse: collapse; margin:20px auto; width:80%; }
   th, td { border:1px solid #555; padding:8px; text-align:center; }
   th { background:#333; }
+  #detailView { display:none; padding:20px; }
+  #backBtn { position:absolute; top:10px; right:10px; }
 </style>
 </head>
 <body>
 <h1 style="text-align:center;">ポキモ 作業時間集計</h1>
-<table id="rankingTable">
-  <tr><th>担当</th><th>総ポキモ時間</th></tr>
-</table>
+
+<!-- 一覧画面 -->
+<div id="listView">
+  <table id="rankingTable">
+    <tr><th>担当</th><th>総ポキモ時間</th><th>詳細</th></tr>
+  </table>
+</div>
+
+<!-- 詳細画面 -->
+<div id="detailView">
+  <button id="backBtn">戻る</button>
+  <h2 id="detailTitle"></h2>
+  <p><strong>担当:</strong> <span id="detailUser"></span></p>
+  <p><strong>ボイスセット:</strong> <span id="detailVoice"></span></p>
+  <p><strong>作業総時間:</strong> <span id="detailTime"></span></p>
+</div>
 
 <script>
+let rowData = [];
+
 async function fetchData() {
   const url = "https://docs.google.com/spreadsheets/d/1SJ7cK5g8Qv3ytS4L0dQkRGKktAu-twa8XOFiB0abrpo/gviz/tq?tqx=out:json&sheet=シート1";
   const res = await fetch(url);
   const text = await res.text();
-
   const json = JSON.parse(text.substr(47).slice(0, -2));
   const rows = json.table.rows;
 
-  // 担当ごとに集計（分）
-  let totals = {};
-rows.forEach(r => {
-  let user = r.c[0]?.v || "";          // A列: 担当者
-  let minutes = Number(r.c[5]?.v) || 0; // F列: 作業時間(分)
-  if (!totals[user]) totals[user] = 0;
-  totals[user] += minutes;
-});
+  // 行データを保存
+  rowData = rows.map(r => ({
+    user: r.c[0]?.v || "",           // A列: 担当
+    minutes: Number(r.c[5]?.v) || 0, // F列: 作業時間(分)
+    voice: r.c[6]?.v || ""           // G列: ボイスセット
+  }));
 
-  // 配列化 & 時間換算
-  let data = Object.keys(totals).map(user => {
-    let totalMin = totals[user];
-    let hours = Math.floor(totalMin / 60);
-    let mins = totalMin % 60;
-    let timeStr = hours > 0 
-      ? (mins > 0 ? `${hours}時間${mins}分` : `${hours}時間`)
-      : `${mins}分`;
-    return { user, timeStr, totalMin };
+  // 集計
+  let totals = {};
+  rowData.forEach(r => {
+    if (!totals[r.user]) totals[r.user] = { minutes:0, voice:r.voice };
+    totals[r.user].minutes += r.minutes;
   });
 
-  // 総時間が多い順にソート
+  // 配列化
+  let data = Object.keys(totals).map(user => {
+    let totalMin = totals[user].minutes;
+    let hours = Math.floor(totalMin / 60);
+    let mins = totalMin % 60;
+    let timeStr = hours>0 ? `${hours}時間${mins}分` : `${mins}分`;
+    return { user, timeStr, totalMin, voice: totals[user].voice };
+  });
+
+  // ソート
   data.sort((a,b)=> b.totalMin - a.totalMin);
 
   // テーブル反映
   const table = document.getElementById("rankingTable");
   data.forEach(d=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${d.user}</td><td>${d.timeStr}</td>`;
+    tr.innerHTML = `<td>${d.user}</td><td>${d.timeStr}</td><td><button>詳細</button></td>`;
+    tr.querySelector("button").addEventListener("click", ()=> showDetail(d));
     table.appendChild(tr);
   });
 }
+
+// 詳細表示
+function showDetail(d) {
+  document.getElementById("listView").style.display="none";
+  document.getElementById("detailView").style.display="block";
+  document.getElementById("detailTitle").innerText = "詳細情報";
+  document.getElementById("detailUser").innerText = d.user;
+  document.getElementById("detailVoice").innerText = d.voice;
+  document.getElementById("detailTime").innerText = d.timeStr;
+}
+
+// 戻る
+document.getElementById("backBtn").addEventListener("click", ()=>{
+  document.getElementById("detailView").style.display="none";
+  document.getElementById("listView").style.display="block";
+});
 
 fetchData();
 </script>
