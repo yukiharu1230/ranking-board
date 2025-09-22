@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ポキモ ランキングボード</title>
+<style>
+  body { background:#111; color:#fff; font-family:sans-serif; }
+  table { border-collapse: collapse; margin:20px auto; width:80%; }
+  th, td { border:1px solid #555; padding:8px; text-align:center; }
+  th { background:#333; }
+</style>
+</head>
+<body>
+<h1 style="text-align:center;">ポキモ ランキング</h1>
+<table id="rankingTable">
+  <tr><th>順位</th><th>ユーザー</th><th>ポイント</th><th>日付</th></tr>
+</table>
+
+<script>
+async function fetchData() {
+  // 公開されたシートのCSVまたはJSON URL
+  const url = "https://docs.google.com/spreadsheets/d/1SJ7cK5g8Qv3ytS4L0dQkRGKktAu-twa8XOFiB0abrpo/gviz/tq?tqx=out:json&sheet=シート1";
+
+  const res = await fetch(url);
+  const text = await res.text();
+
+  // Google Sheets API は JSONP 形式なのでパースが必要
+  const json = JSON.parse(text.substr(47).slice(0, -2));
+  const rows = json.table.rows;
+
+  let data = rows.map(r => ({
+    user: r.c[0]?.v || "",
+    points: parseInt(r.c[1]?.v || 0),
+    date: r.c[2]?.v || ""
+  }));
+
+  // ポイント順にソート
+  data.sort((a,b)=> b.points - a.points);
+
+  // テーブルに反映
+  const table = document.getElementById("rankingTable");
+  data.forEach((d,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}</td><td>${d.user}</td><td>${d.points}</td><td>${d.date}</td>`;
+    table.appendChild(tr);
+  });
+}
+
+fetchData();
+</script>
+</body>
+</html>
