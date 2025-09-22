@@ -27,7 +27,6 @@
   <button id="backBtn">戻る</button>
   <h2 id="detailTitle"></h2>
   <p><strong>担当:</strong> <span id="detailUser"></span></p>
-  <p><strong>ボイスセット:</strong> <span id="detailVoice"></span></p>
   <p><strong>作業総時間:</strong> <span id="detailTime"></span></p>
 </div>
 
@@ -78,7 +77,7 @@ async function fetchData() {
 }
 
 // 詳細表示
-// 詳細表示
+
 function showDetail(d) {
   document.getElementById("listView").style.display="none";
   document.getElementById("detailView").style.display="block";
