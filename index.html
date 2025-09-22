@@ -29,7 +29,7 @@ async function fetchData() {
   let totals = {};
   rows.forEach(r => {
     let user = r.c[0]?.v || "";
-    let minutes = parseInt(r.c[1]?.v || 0); // 作業時間(分)
+    let minutes = Number(r.c[1]?.v) || 0; // 安全に数値化
     if (!totals[user]) totals[user] = 0;
     totals[user] += minutes;
   });
@@ -39,11 +39,10 @@ async function fetchData() {
     let totalMin = totals[user];
     let hours = Math.floor(totalMin / 60);
     let mins = totalMin % 60;
-    return {
-      user,
-      timeStr: `${hours}時間${mins}分`,
-      totalMin
-    };
+    let timeStr = hours > 0 
+      ? (mins > 0 ? `${hours}時間${mins}分` : `${hours}時間`)
+      : `${mins}分`;
+    return { user, timeStr, totalMin };
   });
 
   // 総時間が多い順にソート
@@ -60,6 +59,5 @@ async function fetchData() {
 
 fetchData();
 </script>
-
 </body>
 </html>
