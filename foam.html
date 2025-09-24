@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>登録フォーム</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    width: 1280px;
+    height: 720px;
+    background: url("foam.jpg") no-repeat center center;
+    background-size: cover;
+    font-family: sans-serif;
+  }
+
+#activityForm {
+  position: absolute;
+  top: 40px;   /* Y方向を下に */
+  left: 400px;  /* X方向を右に */
+  width: 600px; /* 少し幅を狭めて中央に収まるように */
+  background: rgba(255,255,255,0.0); /* 透明 */
+}
+
+#activityForm label {
+  display: block;
+  margin: 10px 0;
+  font-size: 20px;
+  color: #000;
+}
+
+  #activityForm input {
+    font-size: 18px;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .price-row input {
+  width: auto;          /* ← 幅を自動に */
+  flex: 1;              /* ← ラベルと一緒に伸縮させる */
+  box-sizing: border-box;
+}
+
+  #activityForm button {
+    margin-top: 15px;
+    font-size: 20px;
+    padding: 8px 20px;
+  }
+  
+.price-row {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.price-row label {
+  flex: 1;
+}
+
+.price-row button {
+  margin-left: auto;    /* 入力欄から離して右端へ */
+  margin-right: 0;
+  font-size: 18px;
+  padding: 6px 16px;
+}
+
+.button-area {
+  position: absolute;
+  right: -200px;   /* 吹き出しの枠に合わせて調整 */
+  bottom: 0px;  /* 吹き出しの枠に合わせて調整 */
+}
+
+.button-area button {
+  font-size: 20px;
+  padding: 8px 20px;
+}
+
+</style>
+</head>
+<body>
+<form id="activityForm">
+  <label>購入番号: <input type="text" name="purchaseId" required></label>
+  <label>活動名: <input type="text" name="activityName" required></label>
+<label>
+  活動場所: 
+  <input type="text" name="activityPlace" 
+         placeholder="YouTube、Twitch" 
+         required>
+</label>
+  <label>X: <input type="text" name="x" required></label>
+<label>
+  販売予定価格: 
+  <input type="text" name="price" 
+         placeholder="500～1000円、メンバー特典で配布予定など" 
+         required>
+</label>
+
+  <!-- ボタンは独立して右下へ -->
+  <div class="button-area">
+    <button type="submit">送信</button>
+  </div>
+</form>
+
+
+  <script>
+  document.getElementById("activityForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+      sheetName: "Sheet2",
+      purchaseId: e.target.purchaseId.value,
+      activityName: e.target.activityName.value,
+      activityPlace: e.target.activityPlace.value,
+      x: e.target.x.value,
+      price: e.target.price.value,
+    };
+
+    await fetch("https://script.google.com/macros/s/AKfycbzrU5qMPPxbv43JJ6pyF-rp9_cRd1uWxqRhGejzqbmK-Een12dk0-eT1wNV_bwTZZ6Ebw/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    alert("送信しました");
+  });
+  </script>
+</body>
+</html>
