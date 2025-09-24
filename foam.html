@@ -104,19 +104,20 @@
 
 
   <script>
-  document.getElementById("activityForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.getElementById("activityForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const data = {
-      sheetName: "Sheet2",
-      purchaseId: e.target.purchaseId.value,
-      activityName: e.target.activityName.value,
-      activityPlace: e.target.activityPlace.value,
-      x: e.target.x.value,
-      price: e.target.price.value,
-    };
+  const data = {
+    sheetName: "Sheet2",
+    purchaseId: e.target.purchaseId.value,
+    activityName: e.target.activityName.value,
+    activityPlace: e.target.activityPlace.value,
+    x: e.target.x.value,
+    price: e.target.price.value,
+  };
 
-    await fetch("https://script.google.com/macros/s/AKfycbzrU5qMPPxbv43JJ6pyF-rp9_cRd1uWxqRhGejzqbmK-Een12dk0-eT1wNV_bwTZZ6Ebw/exec", {
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbxiLWs2Jvt8L-anDrenz243EGMdbGTLAxyTrhiaheBQTNRiGmcdNbewe3u4pVry0_FVLA/exec", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -124,8 +125,12 @@
       body: JSON.stringify(data),
     });
 
-    alert("送信しました");
-  });
+    const result = await res.json();   // Apps Script 側でJSON返すようにする
+    alert("送信しました: " + JSON.stringify(result));
+  } catch (err) {
+    alert("送信に失敗しました: " + err.message);
+  }
+});
   </script>
 </body>
 </html>
