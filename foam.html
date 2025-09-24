@@ -107,28 +107,19 @@
 document.getElementById("activityForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const data = {
-    sheetName: "Sheet2",
-    purchaseId: e.target.purchaseId.value,
-    activityName: e.target.activityName.value,
-    activityPlace: e.target.activityPlace.value,
-    x: e.target.x.value,
-    price: e.target.price.value,
-  };
+  const formData = new FormData(e.target);
+  formData.append("sheetName", "Sheet2");
 
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbxiLWs2Jvt8L-anDrenz243EGMdbGTLAxyTrhiaheBQTNRiGmcdNbewe3u4pVry0_FVLA/exec", {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbxlWs2Jvt8L-anDrenz243EGMdbGTLAXyTrihaheBQTNRiGmcdNbewe3u4pVry0_FVLA/exec", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body: formData
     });
 
-    const result = await res.json();   // Apps Script 側でJSON返すようにする
+    const result = await res.json();
     alert("送信しました: " + JSON.stringify(result));
   } catch (err) {
-    alert("送信に失敗しました: " + err.message);
+    alert("送信に失敗: " + err.message);
   }
 });
   </script>
